@@ -1,7 +1,9 @@
 const { google } = require('googleapis')
+const API_KEY = process.env.API_KEY
+const CHANNEL_ID = process.env.CHANNEL_ID
 const youtube = google.youtube({
     version: "v3",
-    auth: "AIzaSyAiilGnvB3gHSb1WaiSZ7WppmlaUYpXHrs"
+    auth: API_KEY
 });
 
 async function getChannelId(username){
@@ -24,7 +26,7 @@ async function getChannelId(username){
 async function getAllChannelVideos(channelId) {
     try {
         const response = await youtube.search.list({
-            part: "snippet",
+            part: ["snippet"], 
             channelId: channelId,
             maxResults: 50 // Number of results to fetch, can be adjusted
         });
@@ -37,7 +39,7 @@ async function getAllChannelVideos(channelId) {
         //     };
         // });
 
-        return videos;
+        return response.data.items;
     } catch (error) {
         console.error("Error fetching channel videos:", error);
         throw error;
@@ -45,10 +47,10 @@ async function getAllChannelVideos(channelId) {
 }
 
 module.exports.getVideos = async (req, res, next) => {
-    const channelUsername = "shresthaclub";
+    // const channelUsername = "shresthaclub";
     try {
-        const channelId = await getChannelId(channelUsername);
-        const videos = await getAllChannelVideos(channelId);
+        // const channelId = await getChannelId(channelUsername);
+        const videos = await getAllChannelVideos(CHANNEL_ID);
         res.json(videos);
     } catch (error) {
         console.error("Error fetching channel videos:", error);
