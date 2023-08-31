@@ -12,7 +12,6 @@ exports.getAuthorDetails =  (author_ids) => {
         connection.query(`SELECT * FROM users WHERE author_id IN (${author_ids})`, async (err, result) => {
             if(err) reject(err)
             else resolve(result)
-            connection.end();
         });
     })
 }
