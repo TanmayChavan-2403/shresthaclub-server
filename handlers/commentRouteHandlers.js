@@ -108,7 +108,7 @@ exports.replyToComment = async (req, res, next) => {
     const replyToComment = { 
         author_id: from_author_id,
         date, 
-        comment, replies: [], 
+        comment, replies: [],
         likes: 0, dislikes: 0
     };
     let result = await collection.updateOne(
@@ -137,7 +137,6 @@ exports.replyToComment = async (req, res, next) => {
     } else {
         res.json({ Status: false, Message: "Sorry! But could not reply" });
     }
-
 }
 
 exports.fetchComments = async (req, res, next) => {
@@ -151,10 +150,14 @@ exports.fetchComments = async (req, res, next) => {
     // Get a reference to the collection with article_id
     const collection = db.collection(article_id + '');
 
+    // Fetching all the comments from the collection
     const reply = await collection.find({});
     let author_ids = new Set();
+
+    // Find returned a cursor, so converting it to array
     reply.toArray()
         .then( async (data) => {
+            // Iterating over all the comments and extracting the author_ids from the metadata.
             data.forEach((comment) => {
                 for(const id in comment.metadata){
                     author_ids.add(id);
@@ -163,11 +166,12 @@ exports.fetchComments = async (req, res, next) => {
             return data;
         })
         .then( (data) => {
+            // This is mysql function to get the author details from the database
+            // based on the authod_id passed returns us (id, name, avatar_url)
             getAuthorDetails(Array.from(author_ids))
             .then(author_details => {
                 let auth_detailss_map ={};
                 for (const author of author_details){
-                    console.log(author);
                     auth_detailss_map[author.author_id] = [author.author_name, author.avatar_url];
                 }
                 res.status(200).json({ payload: data, author_details: auth_detailss_map }).end()
